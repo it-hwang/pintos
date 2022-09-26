@@ -344,6 +344,53 @@ thread_foreach (thread_action_func *func, void *aux)
     }
 }
 
+static bool
+is_wakeup_tick_less (struct list_elem *e1, struct list_elem *e2, void *aux)
+{
+  struct thread *t1 = list_entry (e1, struct thread, elem);
+  struct thread *t2 = list_entry (e2, struct thread, elem);
+  return (t1->wakeup_tick < t2->wakeup_tick);
+}
+
+void
+thread_sleep (int64_t ticks)
+{
+  struct thread *cur = thread_current ();
+  enum intr_level old_level;
+  
+  old_level = intr_disable ();
+  
+  /* Keep the blocked_list sorted according to wakeup_tick */
+  if (cur != idle_thread)
+   {
+      cur->wakeup_tick = ticks;
+      list_insert_ordered (&blocked_list, &cur->elem, is_wakeup_tick_less, NULL);
+   }
+
+  /* Set thread status to THREAD_BLOCKED and schedule */
+  thread_block ();
+
+  intr_set_level (old_level);
+}
+
+void
+thread_awake(int64_t ticks)
+{
+  struct thread *t;
+  struct list_elem *e = list_begin (&blocked_list);
+
+  for (e; e != list_end (&blocked_list);)
+    {
+      t = list_entry (e, struct thread, elem);
+      if (t->wakeup_tick > ticks)
+        break;
+
+      e = list_remove (&t->elem);
+      thread_unblock (t);
+    }
+
+}
+
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) 
