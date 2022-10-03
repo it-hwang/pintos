@@ -236,6 +236,20 @@ thread_block (void)
   schedule ();
 }
 
+static bool
+is_priority_less (struct list_elem *e1, struct list_elem *e2, void *aux)
+{
+
+  ASSERT(e1 != NULL && e2 != NULL);
+
+  struct thread *t1 = list_entry (e1, struct thread, elem);
+  struct thread *t2 = list_entry (e2, struct thread, elem);
+  
+  ASSERT(is_thread(t1) && is_thread(t2));
+
+  return (t1->priority < t2->priority);
+}
+
 /* Transitions a blocked thread T to the ready-to-run state.
    This is an error if T is not blocked.  (Use thread_yield() to
    make the running thread ready.)
