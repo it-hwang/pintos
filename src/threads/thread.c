@@ -237,7 +237,7 @@ thread_block (void)
 }
 
 static bool
-is_priority_less (struct list_elem *e1, struct list_elem *e2, void *aux)
+is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux)
 {
 
   ASSERT (e1 != NULL && e2 != NULL);
@@ -247,7 +247,7 @@ is_priority_less (struct list_elem *e1, struct list_elem *e2, void *aux)
   
   ASSERT (is_thread (t1) && is_thread (t2));
 
-  return (t1->priority < t2->priority);
+  return (t1->priority > t2->priority);
 }
 
 /* Transitions a blocked thread T to the ready-to-run state.
@@ -267,7 +267,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_insert_ordered (&ready_list, &t->elem, is_priority_less, NULL);
+  list_insert_ordered (&ready_list, &t->elem, is_priority_higher, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -338,7 +338,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_insert_ordered (&ready_list, &cur->elem, is_priority_less, NULL);
+    list_insert_ordered (&ready_list, &cur->elem, is_priority_higher, NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
