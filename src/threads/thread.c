@@ -236,7 +236,7 @@ thread_block (void)
   schedule ();
 }
 
-static bool
+bool
 is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux)
 {
 
