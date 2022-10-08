@@ -142,6 +142,6 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
-bool is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux);
+bool is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux UNUSED);
 
 #endif /* threads/thread.h */

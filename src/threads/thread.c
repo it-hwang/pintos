@@ -237,7 +237,7 @@ thread_block (void)
 }
 
 bool
-is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux)
+is_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux UNUSED)
 {
 
   ASSERT (e1 != NULL && e2 != NULL);
@@ -382,7 +382,7 @@ thread_foreach (thread_action_func *func, void *aux)
 }
 
 static bool
-is_wakeup_tick_less (struct list_elem *e1, struct list_elem *e2, void *aux)
+is_wakeup_tick_less (struct list_elem *e1, struct list_elem *e2, void *aux UNUSED)
 {
   ASSERT (e1 != NULL && e2 != NULL);
 

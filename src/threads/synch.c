@@ -269,7 +269,7 @@ cond_init (struct condition *cond)
 }
 
 static bool
-is_sem_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux)
+is_sem_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux UNUSED)
 {
   ASSERT (e1 != NULL && e2 != NULL);
 
