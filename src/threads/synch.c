@@ -276,6 +276,9 @@ is_sem_priority_higher (struct list_elem *e1, struct list_elem *e2, void *aux UN
   struct semaphore_elem *s1 = list_entry (e1, struct semaphore_elem, elem);
   struct semaphore_elem *s2 = list_entry (e2, struct semaphore_elem, elem);
 
+  ASSERT (!list_empty (&s1->semaphore.waiters));
+  ASSERT (!list_empty (&s2->semaphore.waiters));
+
   struct thread *t1 = list_entry (list_front (&(s1->semaphore.waiters)), struct thread, elem);
   struct thread *t2 = list_entry (list_front (&(s2->semaphore.waiters)), struct thread, elem);
 
