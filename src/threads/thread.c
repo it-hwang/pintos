@@ -563,6 +563,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->saved_priority = priority;
+  list_init (&t->donors);
+  t->wait_lock = NULL;
   list_push_back (&all_list, &t->allelem);
 }
 
