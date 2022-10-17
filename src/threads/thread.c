@@ -679,6 +679,29 @@ allocate_tid (void)
   return tid;
 }
 
+
+void
+donate_priority (void)
+{
+  struct thread *t = thread_current ();
+  struct lock *current_lock = t->wait_lock;
+  int depth = 0;
+
+  ASSERT (current_lock != NULL);
+  ASSERT (current_lock->holder != NULL);
+
+  while (current_lock != NULL)
+    {
+      ASSERT (depth < 8);
+
+      if (current_lock->holder->priority < t->priority)
+        current_lock->holder->priority = t->priority;
+
+      current_lock = current_lock->holder->wait_lock;
+      depth++;
+    }
+}
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
