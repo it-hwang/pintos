@@ -98,6 +98,11 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
 #endif
 
+    int saved_priority;                 /* Saved priority (for priority donation) */
+    struct lock *wait_lock;             /* Lock pointer that this thread is waiting. */
+    struct list donors;                 /* Priority donor list. (for multiple donation)*/
+    struct list_elem donor_elem;        /* Prioirty donor list element.*/
+    
     /* Owned by thread.c. */
     int64_t wakeup_tick;                /* The time to wakeup. */
     unsigned magic;                     /* Detects stack overflow. */
