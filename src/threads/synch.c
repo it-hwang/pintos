@@ -246,17 +246,18 @@ lock_release (struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
 
   struct thread *t = lock->holder;
+  struct list_elem *e;
 
-  /* Remove one donor from donor list. */
-  if (!list_empty (&lock->semaphore.waiters))
-    list_remove (&list_entry (list_front (&lock->semaphore.waiters),
-                            struct thread, elem)->donor_elem);
+  /* Remove donors related to this lock from donor list. */
+  e = list_begin (&lock->semaphore.waiters);
+  for (e; e != list_end (&lock->semaphore.waiters); e = list_next (e))
+      list_remove (&list_entry (e, struct thread, elem)->donor_elem);
 
   /* Refresh priority. */
   t->priority = t->saved_priority;
   if (!list_empty (&t->donors))
     {
-      struct list_elem *e = list_begin (&t->donors);
+      e = list_begin (&t->donors);
       for (e; e != list_end (&t->donors); e = list_next (e))
         {
           struct thread *telem = list_entry (e, struct thread, donor_elem);
