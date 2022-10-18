@@ -436,7 +436,27 @@ thread_awake(int64_t ticks)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  struct thread *t = thread_current ();
+  
+  t->priority = new_priority;
+  t->saved_priority = new_priority;
+
+  /* Refresh priority. */
+  t->priority = t->saved_priority;
+  if (!list_empty (&t->donors))
+    {
+      struct list_elem *e = list_begin (&t->donors);
+      for (e; e != list_end (&t->donors); e = list_next (e))
+        {
+          struct thread *telem = list_entry (e, struct thread, donor_elem);
+          if (telem->priority > t->priority)
+            t->priority = telem->priority;
+        }
+    }
+
+  if (t->wait_lock != NULL)
+    donate_priority ();
+
   thread_preempt ();
 }
 
