@@ -254,17 +254,7 @@ lock_release (struct lock *lock)
       list_remove (&list_entry (e, struct thread, elem)->donor_elem);
 
   /* Refresh priority. */
-  t->priority = t->saved_priority;
-  if (!list_empty (&t->donors))
-    {
-      e = list_begin (&t->donors);
-      for (e; e != list_end (&t->donors); e = list_next (e))
-        {
-          struct thread *telem = list_entry (e, struct thread, donor_elem);
-          if (telem->priority > t->priority)
-            t->priority = telem->priority;
-        }
-    }
+  refresh_donated_priority ();
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);

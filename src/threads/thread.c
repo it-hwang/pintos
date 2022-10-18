@@ -437,23 +437,16 @@ void
 thread_set_priority (int new_priority) 
 {
   struct thread *t = thread_current ();
-  
+
   t->priority = new_priority;
   t->saved_priority = new_priority;
 
   /* Refresh priority. */
-  t->priority = t->saved_priority;
-  if (!list_empty (&t->donors))
-    {
-      struct list_elem *e = list_begin (&t->donors);
-      for (e; e != list_end (&t->donors); e = list_next (e))
-        {
-          struct thread *telem = list_entry (e, struct thread, donor_elem);
-          if (telem->priority > t->priority)
-            t->priority = telem->priority;
-        }
-    }
+  refresh_donated_priority ();
 
+  /* Consider nested donation if there is a lock for this thread to wait.
+     But this code may not be executed. Because if there is a waiting lock,
+     this thread will be a blocked state. */
   if (t->wait_lock != NULL)
     donate_priority ();
 
@@ -719,6 +712,22 @@ donate_priority (void)
 
       current_lock = current_lock->holder->wait_lock;
       depth++;
+    }
+}
+
+void
+refresh_donated_priority (void)
+{
+  struct thread *t = thread_current ();
+  struct list_elem *e;
+
+  t->priority = t->saved_priority;
+
+  for (e = list_begin (&t->donors); e != list_end (&t->donors); e = list_next (e))
+    {
+      struct thread *telem = list_entry (e, struct thread, donor_elem);
+      if (telem->priority > t->priority)
+        t->priority = telem->priority;
     }
 }
 
