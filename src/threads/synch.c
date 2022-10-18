@@ -245,6 +245,26 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+  struct thread *t = lock->holder;
+
+  /* Remove one donor from donor list. */
+  if (!list_empty (&lock->semaphore.waiters))
+    list_remove (&list_entry (list_front (&lock->semaphore.waiters),
+                            struct thread, elem)->donor_elem);
+
+  /* Refresh priority. */
+  t->priority = t->saved_priority;
+  if (!list_empty (&t->donors))
+    {
+      struct list_elem *e = list_begin (&t->donors);
+      for (e; e != list_end (&t->donors); e = list_next (e))
+        {
+          struct thread *telem = list_entry (e, struct thread, donor_elem);
+          if (telem->priority > t->priority)
+            t->priority = telem->priority;
+        }
+    }
+
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 }
